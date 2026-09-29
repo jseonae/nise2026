@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>웹접근성 테스트 워크벤치 v3</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <p class="eyebrow">INTERNAL ACCESSIBILITY QA · RUNTIME TEST</p>
+    <h1>웹접근성 테스트 워크벤치 <span>v3</span></h1>
+    <p>검사 콘솔과 실제 테스트 페이지를 분리해 키보드 접근성을 테스트합니다.</p>
+  </div>
+  <div class="top-actions">
+    <button id="exportJson" class="btn ghost" type="button">JSON 저장</button>
+    <button id="exportCsv" class="btn ghost" type="button">CSV 저장</button>
+  </div>
+</header>
+
+<main class="app">
+  <aside class="sidebar">
+    <section class="card">
+      <h2>1. 테스트 HTML</h2>
+      <label class="file-drop" for="fileInput">
+        <strong>그래프 HTML 파일 선택</strong>
+        <span>예: 특수교육_그래프13종_...html</span>
+        <input id="fileInput" type="file" accept=".html,.htm,text/html">
+      </label>
+      <div id="fileMeta" class="file-meta">아직 파일을 선택하지 않았습니다.</div>
+
+      <div class="stack">
+        <button id="openTestWindow" class="btn primary" type="button" disabled>별도 테스트 창 열기</button>
+        <button id="scanWindow" class="btn outline" type="button" disabled>현재 테스트 창 검사</button>
+        <button id="focusWindow" class="btn outline" type="button" disabled>테스트 창으로 이동</button>
+      </div>
+
+      <div class="notice">
+        <b>사용 흐름</b><br>
+        ① HTML 선택 → ② 별도 테스트 창 열기 → ③ 그래프 카드 클릭 → ④ 키보드 직접 조작 → ⑤ 현재 테스트 창 검사
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>2. 직접 조작 체크</h2>
+      <div class="manual-list">
+        <label><input type="checkbox" data-manual="tab"> Tab으로 차트에 진입됨</label>
+        <label><input type="checkbox" data-manual="focus"> 포커스 표시가 보임</label>
+        <label><input type="checkbox" data-manual="arrow"> 방향키로 데이터 이동됨</label>
+        <label><input type="checkbox" data-manual="enter"> Enter/Space로 동작함</label>
+        <label><input type="checkbox" data-manual="escape"> Esc로 툴팁/상태가 닫힘</label>
+        <label><input type="checkbox" data-manual="legend"> 범례 버튼을 키보드로 조작 가능</label>
+        <hr class="manual-sep">
+        <label><input type="checkbox" data-manual="captions"> 영상에 자막/수어 등 대체수단이 제공됨</label>
+        <label><input type="checkbox" data-manual="transcript"> 음성 콘텐츠에 대본/텍스트 대체가 제공됨</label>
+        <label><input type="checkbox" data-manual="soundcue"> 경고·상태를 소리만으로 전달하지 않음</label>
+        <label><input type="checkbox" data-manual="mediaControl"> 자동재생 소리를 정지/음소거할 수 있음</label>
+        <hr class="manual-sep">
+        <label><input type="checkbox" data-manual="darkMode"> 다크모드에서 텍스트/버튼/차트가 정상 표시됨</label>
+        <label><input type="checkbox" data-manual="highContrast"> 고대비에서 정보가 사라지지 않음</label>
+        <label><input type="checkbox" data-manual="focusContrast"> 포커스 표시가 고대비에서도 선명함</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>3. 음성 읽기 시뮬레이션</h2>
+      <div class="tts-status" id="ttsStatus" aria-live="polite">
+        <span class="tts-dot"></span>
+        <span>음성 읽기 대기</span>
+      </div>
+      <div class="stack">
+        <button id="readCurrentFocus" class="btn outline" type="button" disabled>🔊 현재 포커스 읽기</button>
+        <button id="toggleAutoRead" class="btn outline" type="button" disabled aria-pressed="false">자동 읽기: OFF</button>
+        <button id="stopSpeech" class="btn outline" type="button">■ 읽기 정지</button>
+      </div>
+      <label class="range-label" for="speechRate">읽기 속도 <output id="speechRateValue">1.0×</output></label>
+      <input id="speechRate" class="range" type="range" min="0.6" max="1.6" step="0.1" value="1.0">
+      <p class="hint">브라우저 음성합성으로 접근성 이름·역할·상태를 읽습니다. 실제 NVDA/센스리더 결과와는 다를 수 있습니다.</p>
+    </section>
+
+    <section class="card">
+      <h2>4. 검사 관점</h2>
+      <div class="mode-grid" role="group" aria-label="검사 관점">
+        <button class="mode active" data-mode="all" type="button">전체</button>
+        <button class="mode" data-mode="blind" type="button">전맹</button>
+        <button class="mode" data-mode="motor" type="button">지체장애</button>
+        <button class="mode" data-mode="lowvision" type="button">저시력</button>
+        <button class="mode" data-mode="color" type="button">색각이상</button>
+        <button class="mode" data-mode="hearing" type="button">청각장애</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>5. 테스트 창 보기</h2>
+      <div class="mode-grid">
+        <button class="view-btn" data-view="normal" type="button">100%</button>
+        <button class="view-btn" data-view="zoom200" type="button">200%</button>
+        <button class="view-btn" data-view="zoom400" type="button">400%</button>
+        <button class="view-btn" data-view="gray" type="button">흑백</button>
+        <button class="view-btn" data-view="dark" type="button">다크모드</button>
+        <button class="view-btn" data-view="contrast" type="button">고대비</button>
+      </div>
+      <p class="hint">다크/고대비는 접근성 시뮬레이션입니다. 실제 OS 고대비·다크모드 환경에서도 최종 확인하세요.</p>
+    </section>
+  </aside>
+
+  <section class="content">
+    <section class="statusbar card">
+      <div>
+        <span class="status-dot" id="windowDot"></span>
+        <strong id="windowStatus">테스트 창이 열리지 않았습니다.</strong>
+        <p id="windowDetail">HTML 파일을 선택한 뒤 별도 테스트 창을 여세요.</p>
+      </div>
+      <div class="status-actions">
+        <span id="currentPageLabel" class="page-label">현재 화면: -</span>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="검사 요약">
+      <article><span>부적합</span><strong id="failCount">0</strong></article>
+      <article><span>확인필요</span><strong id="warnCount">0</strong></article>
+      <article><span>적합</span><strong id="passCount">0</strong></article>
+      <article><span>실행 차트</span><strong id="chartCount">0</strong></article>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <h2>현재 그래프 실행 테스트</h2>
+          <p>별도 테스트 창의 현재 화면을 직접 검사합니다.</p>
+        </div>
+        <span id="scanStatus" class="pill neutral">대기</span>
+      </div>
+      <div id="chartResults" class="empty">그래프 화면을 연 뒤 ‘현재 테스트 창 검사’를 눌러주세요.</div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <h2>화면 오류 검사</h2>
+          <p>가로 오버플로, 화면 밖 요소, 잘림, 작은 클릭 영역 등을 점검합니다.</p>
+        </div>
+      </div>
+      <div id="layoutResults" class="empty">아직 검사하지 않았습니다.</div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <h2>전체 접근성 검사 결과</h2>
+          <p>정적 구조 + 현재 실행 화면 결과를 함께 표시합니다.</p>
+        </div>
+        <div class="filters">
+          <select id="severityFilter" aria-label="상태 필터">
+            <option value="all">전체 상태</option>
+            <option value="fail">부적합</option>
+            <option value="warn">확인필요</option>
+            <option value="pass">적합</option>
+          </select>
+          <input id="searchFilter" type="search" placeholder="검사 항목 검색" aria-label="검사 항목 검색">
+        </div>
+      </div>
+      <div id="allResults" class="empty">검사 결과가 없습니다.</div>
+    </section>
+
+    <section class="card">
+      <div class="section-head">
+        <div>
+          <h2>스크린리더 관점</h2>
+          <p>현재 그래프 화면의 role / name / state를 표시합니다. 각 항목의 🔊 버튼으로 예상 읽기 문구를 들어볼 수 있습니다.</p>
+        </div>
+      </div>
+      <div id="srView" class="empty">실행 검사 후 표시됩니다.</div>
+    </section>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
